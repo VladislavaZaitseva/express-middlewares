@@ -1,68 +1,83 @@
-const array = [
-    {
-        "id": 1, "name": "Hanna", "surname": "Pleshko", "email": "hannapleshko@gmail.com", "pwd":
-            "12345678"
-    },
-    { "id": 2, "name": "Есения", "surname": "Грант", "email": "yesgrant@mail.ru", "pwd": "12345678" },
-    {
-        "id": 3, "name": "Анастасия", "surname": "Павлова", "email": "pavlova@gmail.com", "pwd":
-            "12345678"
-    },
-    { "id": 4, "name": "Мария", "surname": "Гардон", "email": "gardon@mail.ru", "pwd": "12345678" },
-    {
-        "id": 5, "name": "Марта", "surname": "Котикова", "email": "martaktik@gmail.com", "pwd": "12345678"
-    },
-    { "id": 6, "name": "Борис", "surname": "Юревич", "email": "testdata@gmail.com", "pwd": "12345678" },
-    { "id": 7, "name": "Рыжик", "surname": "Рыжий", "email": "email@gmail.com", "pwd": "12345678" },
-    { "id": 8, "name": "Рейна", "surname": "Собачкова", "email": "dogdoggav@mail.ru", "pwd": "12345678" },
-    { "id": 9, "name": "Максим", "surname": "Николаев", "email": "hanna@gmail.com", "pwd": "12345678" },
-    {
-        "id": 10, "name": "Константин", "surname": "Константинов", "email": "konst@mail.ru", "pwd":
-            "12345678"
-    },
-    { "id": 11, "name": "Иван", "surname": "Иванов", "email": "ivaniv@gmail.com", "pwd": "12345678" },
-    { "id": 12, "name": "Николай", "surname": "Николаев", "email": "nikkkk@mail.ru", "pwd": "12345678" }
-]
+const fs = require('fs');
+const path = './storage/storage.json';
 
 function getAllUser() {
-    if (!array.length) throw new Error('empty')
-    return array
+    const data = JSON.parse(fs.readFileSync(path));
+    if (!data.lenght) throw new Error('empty')
+    return data
+};
+
+function deleteUser(id) {
+    const data = JSON.parse(fs.readFileSync(path));
+    const filtered = data.filter((el) => el.id != id);
+
+    if (filtered.lenght == data.lenght) throw new Error('id is not found')
+
+    fs.writeFileSync(path, JSON.stringify(filtered));
+    return filtered;
 };
 
 function getUserById(id) {
-    const filtered = array.filter((el) => el.id == id)
-    if (!filtered.length) throw new Error('id not found')
-    return filtered[0]
-};
+    const data = JSON.parse(fs.readFileSync(path));
+    const filtered = data.filter((el) => el.id == 0);
 
-function createUser(name, surname, email, pwd) {
+    if (!filtered.lenght) throw new Error('id not found')
+
+    return filtered
+};
+function updateUser(id, name, surname, email, pwd) {
+    const data = JSON.parse(fs.readFileSync(path));
+    const filtered = data.filter((el) => el.id != id);
+
     const item = {
-        id: array.length + 1,
-        name: name,
-        surname: surname,
-        email: email,
-        pwd: pwd
-    }
-
-    array.push(item)
-    return array
-};
-
-function updateUsers(id, name, surname,  email, pwd){
- const item = {
         id: +id,
         name: name,
         surname: surname,
         email: email,
         pwd: pwd
-    };
-
-    const filtered= array.filter((el) => el.id != id)
-    if (filtered.length == array.length) throw new Error('not found')
-    
+    }
+    if (filtered.length === data.length) throw new Error('id not found');
     filtered.push(item)
 
+    fs.writeFileSync(path, JSON.stringify(filtered));
     return filtered
+};
+
+function createUser(name, surname, email, pwd) {
+    const data = JSON.parse(fs.readFileSync(path));
+    const item = {
+        id: data.length + 1,
+        name: name,
+        surname: surname,
+        email: email,
+        pwd: pwd
+    }
+    data.push(item)
+    return data
+};
+
+function patchUser(id, clientObj) {
+    const data = JSON.parse(fs.readFileSync(path));
+
+    const oldData = data.find((el) => el.id == id);
+
+    const newData = { ...oldData, ...clientObj };
+
+    const patched = data.filter((el) => el.id != id);
+    
+    if (data.length == patched.length) throw new Error('id not found')
+    patched.push(newData)
+
+    fs.writeFileSync(path, JSON.stringify(patched))
+    return patched
 }
 
-module.exports = { getAllUser, getUserById, createUser,updateUsers }
+
+module.exports = {
+    getAllUser,
+    deleteUser,
+    getUserById,
+    updateUser,
+    createUser,
+    patchUser
+}

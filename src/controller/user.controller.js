@@ -1,11 +1,13 @@
 const express = require('express');
-const {
-    getAllUser,
+const { getAllUser,
+    deleteUser,
     getUserById,
+    updateUser,
     createUser,
-    updateUsers
-} = require('../service/user.service')
-const router = express.Router()
+    patchUser
+} = require('../service/user.service');
+
+const router = express.Router();
 
 router.get('/', (req, res) => {
     try {
@@ -16,15 +18,47 @@ router.get('/', (req, res) => {
     }
 });
 
-router.get('/:id', (req, res) => {
+router.delete('/:id', (req, res) => {
     try {
-        const { id } = req.params
-        const data = getUserById(id)
+        const { id } = req.params;
+        const data = deleteUser(id);
         res.status(200).send(data)
     } catch (error) {
         res.status(404).send(error.message)
     }
 });
+
+router.get('/:id', (res, req) => {
+    try {
+        const { id } = req.params;
+        const data = getUserById(id);
+        res.status(200).send(data)
+    } catch (error) {
+        res.status(404).send(error.message)
+    }
+});
+
+router.put('/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, surname, email, pwd } = req.body;
+        const data = updateUser(id, name, surname, email, pwd);
+        res.status(200).send(data)
+    } catch (error) {
+        res.status(404).send(error.message)
+    }
+});
+
+router.patch('/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const clientObj = req.body;
+        const data = patchUser(id, clientObj);
+        res.status(200).send(data)
+    } catch (error) {
+        res.status(404).send(error.message)
+    }
+})
 
 router.post('/', (req, res) => {
     try {
@@ -36,15 +70,4 @@ router.post('/', (req, res) => {
     }
 });
 
-router.put('/:id', (req, res) => {
-    try {
-        const { id } = req.params;
-        const { name, surname, email, pwd } = req.body;
-        const data = updateUsers(id, name, surname, email, pwd);
-        res.status(200).send(data)
-    } catch (error) {
-        res.status(404).send(error.message)
-    }
-})
-
-module.exports = { router }
+module.exports = router;
